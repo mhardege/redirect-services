@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>VS Code Redirect</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <main>
+    <h1>VS Code Redirect</h1>
+
+    <section id="redirecting" hidden>
+      <p>Opening in VS Code&hellip;</p>
+      <p><a id="manual-link" href="#">Open manually</a></p>
+    </section>
+
+    <section id="converter" hidden>
+      <p>Paste an absolute local file path to get clickable https links.</p>
+      <label for="source">Local path</label>
+      <input id="source" type="text" placeholder="/Users/..." autocomplete="off">
+      <label for="file-result">Open file</label>
+      <input id="file-result" type="text" readonly>
+      <button data-copy="file-result" type="button" disabled>Copy</button>
+      <label for="folder-result">Open containing folder (new window)</label>
+      <input id="folder-result" type="text" readonly>
+      <button data-copy="folder-result" type="button" disabled>Copy</button>
+    </section>
+  </main>
+
+  <script type="module">
+    import { toVscodeUri, parentFolder, toRedirectLink } from "./redirect.js";
+
+    const target = toVscodeUri(location.hash);
+
+    if (target) {
+      document.getElementById("manual-link").href = target;
+      document.getElementById("redirecting").hidden = false;
+      location.replace(target);
+    } else {
+      const source = document.getElementById("source");
+      const fileResult = document.getElementById("file-result");
+      const folderResult = document.getElementById("folder-result");
+      const buttons = document.querySelectorAll("[data-copy]");
+      document.getElementById("converter").hidden = false;
+
+      source.addEventListener("input", () => {
+        const fileLink = toRedirectLink(source.value, location.href);
+        fileResult.value = fileLink || "";
+        folderResult.value = fileLink ? toRedirectLink(parentFolder(source.value.trim()), location.href, { newWindow: true }) : "";
+        buttons.forEach((button) => { button.disabled = !fileLink; });
+      });
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          navigator.clipboard.writeText(document.getElementById(button.dataset.copy).value);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

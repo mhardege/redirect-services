@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Obsidian Redirect</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <main>
+    <h1>Obsidian Redirect</h1>
+
+    <section id="redirecting" hidden>
+      <p>Opening note in Obsidian&hellip;</p>
+      <p><a id="manual-link" href="#">Open manually</a></p>
+    </section>
+
+    <section id="converter" hidden>
+      <p>Paste an <code>obsidian://open</code> link to get a clickable https link.</p>
+      <label for="source">Obsidian link</label>
+      <input id="source" type="text" placeholder="obsidian://open?vault=...&amp;file=..." autocomplete="off">
+      <label for="result">Redirect link</label>
+      <input id="result" type="text" readonly>
+      <button id="copy" type="button" disabled>Copy</button>
+    </section>
+  </main>
+
+  <script type="module">
+    import { toObsidianUri, toRedirectLink } from "./redirect.js";
+
+    const target = toObsidianUri(location.hash);
+
+    if (target) {
+      document.getElementById("manual-link").href = target;
+      document.getElementById("redirecting").hidden = false;
+      location.replace(target);
+    } else {
+      const source = document.getElementById("source");
+      const result = document.getElementById("result");
+      const copy = document.getElementById("copy");
+      document.getElementById("converter").hidden = false;
+
+      source.addEventListener("input", () => {
+        result.value = toRedirectLink(source.value, location.href) || "";
+        copy.disabled = !result.value;
+      });
+      copy.addEventListener("click", () => navigator.clipboard.writeText(result.value));
+    }
+  </script>
+</body>
+</html>
