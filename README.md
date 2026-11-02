@@ -31,7 +31,7 @@ https://mhardege.github.io/redirect-services/vscode/#path=<absolute path>
 
 - Opening the page without a fragment shows a converter: paste an absolute path
   and copy either the file link or the link to its containing folder.
-- Folder links add `window=new` to open a new VS Code window instead of
+- Converter links add `window=new` to open a new VS Code window instead of
   replacing the current workspace.
 
 ## Development

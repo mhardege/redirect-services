@@ -27,3 +27,42 @@ button {
   padding: 0.5rem 1rem;
   font: inherit;
 }
+
+.hint {
+  margin: 0.5rem 0 0;
+  color: GrayText;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.result-label {
+  flex: 0 0 4rem;
+  font-weight: 600;
+}
+
+.result-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result button,
+.result .button {
+  margin: 0;
+  padding: 0.4rem 0.8rem;
+}
+
+.button {
+  border: 1px solid ButtonBorder;
+  border-radius: 4px;
+  color: ButtonText;
+  background: ButtonFace;
+  text-decoration: none;
+}

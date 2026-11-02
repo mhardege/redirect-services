@@ -18,6 +18,13 @@ export function toVscodeUri(hash) {
 }
 
 /**
+ * Trims whitespace and surrounding quotes from a pasted path.
+ */
+export function normalizePath(path) {
+  return (path || "").trim().replace(/^(["'])(.*)\1$/, "$2").trim();
+}
+
+/**
  * Returns the folder that contains the given absolute path.
  */
 export function parentFolder(path) {
@@ -27,11 +34,19 @@ export function parentFolder(path) {
 }
 
 /**
+ * Returns the last segment of a path, used as display name.
+ */
+export function baseName(path) {
+  const trimmed = path.replace(/\/+$/, "");
+  return trimmed.slice(trimmed.lastIndexOf("/") + 1) || "/";
+}
+
+/**
  * Converts an absolute local path into the https redirect link.
  * Returns null if the input is not an absolute path.
  */
 export function toRedirectLink(path, baseUrl, { newWindow = false } = {}) {
-  const trimmed = (path || "").trim();
+  const trimmed = normalizePath(path);
   if (!trimmed.startsWith("/")) return null;
   const params = new URLSearchParams({ path: trimmed });
   if (newWindow) params.set("window", "new");

@@ -17,20 +17,30 @@
     </section>
 
     <section id="converter" hidden>
-      <p>Paste an absolute local file path to get clickable https links.</p>
+      <p>Paste a local path. Links open in a new VS Code window.</p>
       <label for="source">Local path</label>
-      <input id="source" type="text" placeholder="/Users/..." autocomplete="off">
-      <label for="file-result">Open file</label>
-      <input id="file-result" type="text" readonly>
-      <button data-copy="file-result" type="button" disabled>Copy</button>
-      <label for="folder-result">Open containing folder (new window)</label>
-      <input id="folder-result" type="text" readonly>
-      <button data-copy="folder-result" type="button" disabled>Copy</button>
+      <input id="source" type="text" placeholder="/Users/..." autocomplete="off" spellcheck="false">
+      <p id="hint" class="hint" hidden>Enter an absolute path starting with <code>/</code>.</p>
+
+      <div id="results" hidden>
+        <div class="result">
+          <span class="result-label">File</span>
+          <span class="result-name" id="file-name"></span>
+          <button type="button" data-copy="file">Copy link</button>
+          <a class="button" id="file-open" href="#">Open</a>
+        </div>
+        <div class="result">
+          <span class="result-label">Folder</span>
+          <span class="result-name" id="folder-name"></span>
+          <button type="button" data-copy="folder">Copy link</button>
+          <a class="button" id="folder-open" href="#">Open</a>
+        </div>
+      </div>
     </section>
   </main>
 
   <script type="module">
-    import { toVscodeUri, parentFolder, toRedirectLink } from "./redirect.js";
+    import { toVscodeUri, normalizePath, parentFolder, baseName, toRedirectLink } from "./redirect.js";
 
     const target = toVscodeUri(location.hash);
 
@@ -40,20 +50,32 @@
       location.replace(target);
     } else {
       const source = document.getElementById("source");
-      const fileResult = document.getElementById("file-result");
-      const folderResult = document.getElementById("folder-result");
-      const buttons = document.querySelectorAll("[data-copy]");
+      const hint = document.getElementById("hint");
+      const results = document.getElementById("results");
+      const links = {};
       document.getElementById("converter").hidden = false;
 
       source.addEventListener("input", () => {
-        const fileLink = toRedirectLink(source.value, location.href);
-        fileResult.value = fileLink || "";
-        folderResult.value = fileLink ? toRedirectLink(parentFolder(source.value.trim()), location.href, { newWindow: true }) : "";
-        buttons.forEach((button) => { button.disabled = !fileLink; });
+        const path = normalizePath(source.value);
+        const valid = path.startsWith("/");
+        hint.hidden = !path || valid;
+        results.hidden = !valid;
+        if (!valid) return;
+
+        const folder = parentFolder(path);
+        links.file = toRedirectLink(path, location.href, { newWindow: true });
+        links.folder = toRedirectLink(folder, location.href, { newWindow: true });
+        document.getElementById("file-name").textContent = baseName(path);
+        document.getElementById("folder-name").textContent = baseName(folder);
+        document.getElementById("file-open").href = links.file;
+        document.getElementById("folder-open").href = links.folder;
       });
-      buttons.forEach((button) => {
-        button.addEventListener("click", () => {
-          navigator.clipboard.writeText(document.getElementById(button.dataset.copy).value);
+
+      document.querySelectorAll("[data-copy]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          await navigator.clipboard.writeText(links[button.dataset.copy]);
+          button.textContent = "Copied";
+          setTimeout(() => { button.textContent = "Copy link"; }, 1500);
         });
       });
     }
