@@ -67,8 +67,8 @@
         links.folder = toRedirectLink(folder, location.href, { newWindow: true });
         document.getElementById("file-name").textContent = baseName(path);
         document.getElementById("folder-name").textContent = baseName(folder);
-        document.getElementById("file-open").href = links.file;
-        document.getElementById("folder-open").href = links.folder;
+        document.getElementById("file-open").href = toVscodeUri(new URL(links.file).hash);
+        document.getElementById("folder-open").href = toVscodeUri(new URL(links.folder).hash);
       });
 
       document.querySelectorAll("[data-copy]").forEach((button) => {
